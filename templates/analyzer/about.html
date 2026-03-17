@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Emotion AI - Модель туралы{% endblock %}
+
+{% block content %}
+<section class="section-gap">
+  <div class="container-xl d-grid about-grid">
+    <div class="card glassy">
+      <div class="eyebrow">Модель</div>
+      <h2>{{ model_info.name }}</h2>
+      <p>{{ model_info.description }}</p>
+      <div class="pill-row">
+        {% for e in model_info.emotions %}
+        <span class="pill pill-ghost">{{ e.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card glassy">
+      <div class="eyebrow">Қалай жұмыс істейді</div>
+      <ul class="icon-list">
+        <li>🧠 Transformer негізіндегі көпкласты классификация</li>
+        <li>🌐 Қазақ/орыс тілдерін автоматты анықтау</li>
+        <li>🧾 Сөйлемдік талдау және тарихқа сақтау</li>
+      </ul>
+    </div>
+
+    <div class="card glassy">
+      <div class="eyebrow">Шектеулер</div>
+      <ul class="icon-list">
+        {% for line in model_info.limitations.splitlines %}
+          {% if line|cut:" " %}<li>⚠️ {{ line }}</li>{% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card glassy">
+      <div class="eyebrow">Құпиялылық</div>
+      <p>Мәтіндер тек сессия ішінде қолданылады және серверде тұрақты сақталмайды. Жеке деректер жиналмайды.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

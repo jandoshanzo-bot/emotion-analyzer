@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Шығу - Emotion AI{% endblock %}
+
+{% block content %}
+<section class="section-gap">
+  <div class="container-xl" style="max-width:420px;">
+    <div class="glassy card">
+      <h3>Сессия аяқталды</h3>
+      <p>Қайта кіру үшін төмендегі батырманы басыңыз.</p>
+      <a class="btn primary" href="{% url 'login' %}" style="width:100%;">Қайта кіру</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

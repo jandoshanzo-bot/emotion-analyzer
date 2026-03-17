@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Emotion AI - Басты бет{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/charts_extra.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="hero section-gap">
+  <div class="container-xl d-grid hero-grid">
+    <div class="hero-copy glassy">
+      <div class="pill">ЖИ көмегімен</div>
+      <h1>Мәтініңіздегі эмоцияны жылдам және дәл анықтаңыз.</h1>
+      <p>Қазақ және орыс тілдерін автоматты тану, эмоция үлесін көрсету және сөйлем деңгейінде талдау.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#analyzeBox">Талдау</a>
+        <a class="btn ghost" href="{% url 'analyzer:about' %}">Модель туралы</a>
+      </div>
+      <div class="hero-meta">
+        <span>⚡ Жылдам нәтиже</span>
+        <span>🔒 Құпиялылық</span>
+        <span>📊 Толық статистика</span>
+      </div>
+    </div>
+    <div class="hero-visual glassy">
+      <canvas id="heroPulse"></canvas>
+      <div class="badge-floating">Нақты уақытта</div>
+      <div class="badge-floating secondary">Қос тілді</div>
+    </div>
+  </div>
+</section>
+
+<section class="section-gap" id="analyzeBox">
+  <div class="container-xl glassy panel">
+    <div class="panel-header">
+      <div>
+        <div class="eyebrow">Жылдам талдау</div>
+        <h2>Мәтінді енгізіп, эмоция нәтижесін алыңыз</h2>
+      </div>
+      <div class="select-group">
+        <label for="languageSelect">Тіл</label>
+        <select id="languageSelect" class="form-select">
+          <option value="auto">Авто анықтау</option>
+          <option value="kk">Қазақша</option>
+          <option value="ru">Орысша</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="textarea-wrap">
+      <textarea id="textInput" rows="6" placeholder="Мысалы: Бүгін керемет күн! Достарыммен уақыт өткізіп, өзімді өте қуанышты сезіндім."></textarea>
+      <div class="textarea-actions">
+        <button type="button" class="btn ghost" id="demoBtn">Демо мәтін</button>
+        <div class="inline-metrics">
+          <span id="charCount">0</span> таңба ·
+          <span id="wordCount">0</span> сөз ·
+          <span id="sentenceCount">0</span> сөйлем
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-actions">
+      <button type="button" class="btn primary" id="analyzeBtn">
+        <span class="btn-loader"></span>
+        Талдау жасау
+      </button>
+      <button type="button" class="btn subtle" id="clearBtn">Тазалау</button>
+    </div>
+  </div>
+</section>
+
+<section class="section-gap" id="resultsSection" style="display:none;">
+  <div class="container-xl d-grid results-grid">
+    <div class="card glassy">
+      <div class="eyebrow">Негізгі эмоция</div>
+      <div class="primary-emotion-badge" id="primaryBadge">
+        <span id="primaryEmoji">🙂</span>
+        <div>
+          <div id="primaryEmotionName">—</div>
+          <div class="sub" id="primaryPercentage">0%</div>
+        </div>
+      </div>
+      <div class="confidence-bar">
+        <div class="confidence-fill" id="confidenceFill"></div>
+      </div>
+      <div class="confidence-value">Сенімділік: <span id="confidenceValue">0%</span></div>
+    </div>
+
+    <div class="card glassy">
+      <div class="eyebrow">Эмоция үлесі</div>
+      <div id="emotionsList" class="emotions-list"></div>
+    </div>
+
+    <div class="card glassy">
+      <div class="eyebrow">Диаграммалар</div>
+      <div class="chart-tabs">
+        <button class="tab-btn active" data-chart="bar">Баған</button>
+        <button class="tab-btn" data-chart="donut">Дөңгелек</button>
+      </div>
+      <div class="chart-area">
+        <canvas id="barChart"></canvas>
+        <canvas id="pieChart" style="display:none;"></canvas>
+      </div>
+    </div>
+
+    <div class="card glassy">
+      <div class="eyebrow">Сөйлемдер</div>
+      <div id="sentencesList" class="sentences-list"></div>
+    </div>
+
+    <div class="card glassy" style="grid-column: 1 / -1; padding: 1.5rem;">
+      <div class="eyebrow" style="margin-bottom:1rem;">🕸️ Эмоция торы</div>
+      <div class="radar-wrapper" style="position:relative; height:320px; width:100%;">
+        <canvas id="radarChart" style="display:block;"></canvas>
+      </div>
+    </div>
+
+    <div class="card glassy thermometer-card" id="thermometerSection" style="grid-column: 1 / -1; display:none;">
+      <div class="eyebrow">🌡️ Эмоция термометрі</div>
+      <div id="thermometerContainer"></div>
+    </div>
+  </div>
+
+  <div id="timelineSection" class="container-xl timeline-card" style="display:none; margin-top:1.5rem;">
+    <div class="eyebrow">📈 Талдау тарихы</div>
+    <div class="timeline-wrapper">
+      <canvas id="timelineChart"></canvas>
+    </div>
+    <table class="timeline-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Уақыт</th>
+          <th>Эмоция</th>
+          <th>Сенімділік</th>
+        </tr>
+      </thead>
+      <tbody id="timelineHistoryBody"></tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/analyzer.js' %}"></script>
+{% endblock %}

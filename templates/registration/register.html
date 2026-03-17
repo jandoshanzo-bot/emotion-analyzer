@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Тіркелу - Emotion AI{% endblock %}
+
+{% block content %}
+<section class="section-gap">
+  <div class="container-xl" style="max-width:420px;">
+    <div class="glassy card">
+      <h2>Тіркелу</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn primary" style="width:100%; margin-top:10px;">Тіркелу</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

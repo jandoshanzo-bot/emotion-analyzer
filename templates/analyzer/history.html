@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Emotion AI - Тарих{% endblock %}
+
+{% block content %}
+<section class="section-gap">
+  <div class="container-xl d-flex align-items-center justify-content-between gap-3 flex-wrap">
+    <div>
+      <div class="eyebrow">Соңғы талдаулар</div>
+      <h2>Тарих және статистика</h2>
+    </div>
+    {% if analyses %}
+    <button class="btn btn-danger btn-small" id="clearAllBtn">Барлығын жою</button>
+    {% endif %}
+  </div>
+
+  <div class="container-xl d-grid history-grid">
+    <div class="card glassy">
+      <div class="stats-grid">
+        <div class="stat-tile">
+          <div class="label">Барлық талдау</div>
+          <div class="value" id="totalCount">{{ stats.total }}</div>
+        </div>
+        <div class="stat-tile">
+          <div class="label">Орташа сенімділік</div>
+          <div class="value">
+            {% if stats.avg_confidence %}{{ stats.avg_confidence|floatformat:0 }}%{% else %}-{% endif %}
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="label">Ең жиі эмоция</div>
+          <div class="value">{% if top_emotion_label %}{{ top_emotion_label }}{% else %}-{% endif %}</div>
+          {% if top_emotion_label %}<div class="sub">{{ top_emotion_count }} рет</div>{% endif %}
+        </div>
+      </div>
+      <form class="filter-row">
+        <input type="date" class="form-control" placeholder="Күн">
+        <select class="form-select">
+          <option value="">Эмоция (барлығы)</option>
+          {% for emotion_name, count in stats.by_emotion.items %}
+          <option value="{{ emotion_name }}">{{ emotion_name }}</option>
+          {% endfor %}
+        </select>
+        <button type="button" class="btn btn-secondary btn-small">Сүзгілеу</button>
+      </form>
+    </div>
+
+    <div class="card glassy">
+      {% if analyses %}
+      <div class="history-list">
+        {% for analysis in analyses %}
+        <div class="history-row" data-id="{{ analysis.id }}">
+          <div class="history-left">
+            <div class="history-emotion-badge">
+              <span class="emoji">{{ analysis.primary_emotion_emoji|default:"😐" }}</span>
+              <div>
+                <div class="name">{{ analysis.primary_emotion_label|default:analysis.primary_emotion|default:"-" }}</div>
+                <div class="sub">{{ analysis.confidence|default:0|floatformat:1 }}%</div>
+              </div>
+            </div>
+            <div class="history-text">{{ analysis.text_snippet|default:"-" }}</div>
+            <div class="meta">
+              <span>⏱ {{ analysis.created_at|date:"d.m.Y H:i" }}</span>
+              <span>🌐 {{ analysis.get_language_display|default:"-" }}</span>
+              <span>✉️ {{ analysis.sentence_count|default:0 }} сөйлем</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="btn btn-secondary btn-icon btn-small view-details" data-id="{{ analysis.id }}" title="Толық ақпарат">👁️</button>
+            <button class="btn btn-danger btn-icon btn-small delete-item" data-id="{{ analysis.id }}" title="Жою">🗑️</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="emoji">📭</div>
+        <h4>Тарих бос</h4>
+        <p>Алдымен мәтінді талдап көріңіз.</p>
+        <a class="btn btn-primary" href="{% url 'analyzer:home' %}">Талдауға өту</a>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if stats.by_emotion %}
+    <div class="card glassy">
+      <div class="eyebrow">Эмоция таралуы</div>
+      <canvas id="emotionDistributionChart"></canvas>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<div class="modal" id="detailsModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content glassy">
+    <div class="modal-header">
+      <h3 class="modal-title">Талдау мәліметтері</h3>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ stats.by_emotion|json_script:"emotion-distribution-data" }}
+<script>
+  const emotionDistribution = JSON.parse(
+    document.getElementById("emotion-distribution-data").textContent
+  );
+</script>
+<script src="{% static 'js/history.js' %}" defer></script>
+{% endblock %}
